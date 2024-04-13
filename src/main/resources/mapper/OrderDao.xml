@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xisuo.sellmanager.dao.OrderDao">
+
+
+    <select id="getMonMoney" resultType="hashmap">
+        select SUM(total_money) as total_money ,SUM(already_pay)  as already_pay  from `order` where
+        `create_date` &lt; #{endTime}  and `create_date` &gt; #{startTime}
+    </select>
+
+
+    <select id="getDayMoney" resultType="string">
+        select SUM(total_money) as total_money   from `order` where create_date &gt; #{startTime} and create_date  &lt; #{endTime}
+    </select>
+
+    <insert id="createOrder" parameterType="com.xisuo.sellmanager.entity.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `order` (
+            `user_id`,`customer_id`,`create_date`,
+            `total_money`,`already_pay`,`next_pay_time`,
+            `discount`,`product_state`,`pay_state`,
+            `send_time`,`send_address`,`send_price`,
+            `send_way`
+        ) VALUES (
+                #{userId},#{customerId},#{createDate},
+                #{totalMoney},#{alreadyPay},#{nextPayTime},
+                #{discount},#{productState},#{payState},
+                #{sendTime},#{sendAddress},#{sendPrice},
+                #{sendWay}
+        )
+        <!-- 指定结果类型resultType，keyProperty是属性，自动返回到属性id中，order是次序，after是指获取id是在于插入后
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select @@identity
+        </selectKey>-->
+    </insert>
+
+    <insert id="createOrderDetail" parameterType="com.xisuo.sellmanager.entity.OrderDetail">
+        INSERT INTO `order_detail` (
+            `order_id`,`product_id`,`product_code`,
+            `product_name`,`amount`,`univalent`,
+            `total_price`
+        ) VALUES
+        <foreach collection="lists" item="list" separator=",">
+        (
+                #{list.orderId},#{list.productId},#{list.productCode},
+                #{list.productName},#{list.amount},#{list.univalent},
+                #{list.totalPrice}
+        )
+        </foreach>
+    </insert>
+
+    <select id="getOrderById" resultType="VoOrder">
+        SELECT
+            a.*,
+            b.NAME as customer_name
+        FROM
+            `order` a
+            LEFT JOIN `customer` b ON a.customer_id = b.id
+        WHERE
+            a.id = #{orderId}
+    </select>
+
+    <select id="queryOrderDetail" resultType="com.xisuo.sellmanager.entity.OrderDetail">
+        select * from `order_detail` where `order_id` = #{orderId}
+    </select>
+
+    <update id="modifyOrder" parameterType="com.xisuo.sellmanager.entity.Order">
+        UPDATE `order`
+        SET
+         `total_money` = #{totalMoney},
+         `already_pay` = #{alreadyPay},
+         `next_pay_time` = #{nextPayPime},
+         `discount` = #{discount},
+         `product_state` = #{productState},
+         `pay_state` = #{payState},
+         `send_time` = #{sendTime},
+         `send_address` = #{address},
+         `send_price` = #{sendPrice},
+         `send_way` = #{sendWay}
+        WHERE
+            `id` = #{id}
+    </update>
+
+
+    <update id="modifyOrderDetail" parameterType="com.xisuo.sellmanager.entity.OrderDetail">
+        UPDATE `order_detail`
+        SET
+         `product_code` = #{productCode},
+         `product_name` = #{productName},
+         `amount` = #{amount},
+         `univalent` = #{univalent},
+         `total_price` = #{totalPrice}
+        WHERE
+            `id` = #{id}
+    </update>
+
+
+    <select id="getOrderList" resultType="VoOrder">
+        SELECT a.*,b.name as customerName,c.name as userName  from `order`  a
+            LEFT JOIN `customer` b  on a.customer_id=b.id
+            LEFT JOIN `user` c on a.user_id =c.id
+        where 1=1
+        <if test="customerName != null">
+            and b.name like #{customerName}
+        </if>
+        <if test="userId != null">
+            and c.id= #{userId}
+        </if>
+        <if test="startTime != null">
+            and a.create_date &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            and a.create_date &lt; #{endTime}
+        </if>
+        <if test="sendTime != null">
+            and a.send_time = #{sendTime}
+        </if>
+        ORDER BY a.id desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+
+
+    <select id="getOrderListNum" resultType="int">
+        SELECT count(1)  from `order`  a
+        LEFT JOIN `customer` b  on a.customer_id=b.id
+        LEFT JOIN `user` c on a.user_id =c.id
+        where 1=1
+        <if test="customerName != null">
+            and b.name like #{customerName}
+        </if>
+        <if test="userId != null">
+            and c.id= #{userId}
+        </if>
+        <if test="startTime != null">
+            and a.create_date &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            and a.create_date &lt; #{endTime}
+        </if>
+        <if test="sendTime != null">
+            and a.send_time = #{sendTime}
+        </if>
+    </select>
+
+
+    <select id="queryDaySipping" resultType="string">
+        SELECT
+            b.name
+        FROM
+            `order` a
+            LEFT JOIN `customer` b ON a.customer_id = b.id
+        WHERE
+            a.`send_time` = #{days}
+    </select>
+
+
+    <select id="queryDayReceipt" resultType="hashmap">
+        SELECT
+            b.name ,a.total_money as totalMoney
+        FROM
+            `order` a
+            LEFT JOIN `customer` b ON a.customer_id = b.id
+        WHERE
+            a.`next_pay_time` = #{days}
+    </select>
+
+
+    <select id="queryOrderCount" resultType="int">
+        SELECT count(1)  from `order`  where  create_date &gt; #{startTime} and create_date  &lt; #{endTime}
+    </select>
+
+
+
+
+<!--
+
+
+
+一段时间内的订单总金额和总个数
+
+SELECT
+	sum( total_money ) AS total_money,
+	count( 1 ) AS count
+FROM
+	`order`
+WHERE
+	create_date < '2019-02-28' AND create_date > '2019-02-01'
+
+-->
+
+
+
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xisuo.sellmanager.dao.UserDao">
+
+    <select id="getUserByName" resultType="com.xisuo.sellmanager.entity.User">
+        select a.* from `user` a where a.name=#{username}
+    </select>
+
+    <insert id="createUser" parameterType="com.xisuo.sellmanager.entity.User">
+        INSERT INTO `user` (
+            `password`,`name`,`age`,
+            `phone`,`role`,`user_state`
+        )  VALUES  (
+            #{password}, #{name},#{age},
+            #{phone},#{role},#{userState} )
+    </insert>
+
+    <delete id="deleteUser">
+        UPDATE `user` SET `user_state` = 2  WHERE   `id` = #{id}
+    </delete>
+
+    <select id="getUserById" resultType="User">
+        select * from `user` where id=#{id}
+    </select>
+
+    <update id="modifyPassword">
+        UPDATE `user` SET `password` = #{password}  WHERE   `id` = #{id}
+    </update>
+
+    <update id="saveModifyUser" parameterType="com.xisuo.sellmanager.entity.User">
+        UPDATE `user`  SET
+         `age` = #{age},
+         `phone` = #{phone},
+         `role` = #{role},
+         `user_state` = #{userState}
+        WHERE `id` = #{id}
+    </update>
+
+    <select id="getAllUsername" resultType="string">
+        select `name` from `user` where `user_state`!=2
+    </select>
+
+    <select id="getAllUser" resultType="com.xisuo.sellmanager.entity.User">
+        select * from `user`  where  1=1
+        <if test="keyword != null">
+            and `name` like #{keyword}
+        </if>
+        <if test="phone != null">
+            and `phone` like #{phone}
+        </if>
+        <if test="role != null">
+            and `role`=#{role}
+        </if>
+        <if test="userState != null">
+            and `user_state`=#{userState}
+        </if>
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="getAllUserNum" resultType="int">
+        select count(1) from `user`  where  1=1
+        <if test="keyword != null">
+            and `name` like #{keyword}
+        </if>
+        <if test="phone != null">
+            and `phone` like #{phone}
+        </if>
+        <if test="role != null">
+            and `role`=#{role}
+        </if>
+        <if test="userState != null">
+            and  `user_state`=#{userState}
+        </if>
+    </select>
+
+    <select id="queryUserIdName" resultType="hashmap">
+        SELECT `id`,`name` from `user` where `user_state`=0
+    </select>
+
+    <select id="findName" resultType="int">
+        select count(1)  from `user`  where `name` = #{name}
+    </select>
+
+</mapper>

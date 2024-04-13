@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xisuo.sellmanager.dao.CustomerDao">
+
+    <insert id="createCustomer" parameterType="com.xisuo.sellmanager.entity.Customer">
+        INSERT INTO `customer` (
+            `name`,`company_address`,`person`,
+            `phone`,`profession`,`province`,
+            `city`,`user_id`,`customer_state`,
+            `competitor`,`note`,`bank_name`,
+            `bank_no`,`bill_address`,`bill_person`,
+            `bill_phone`,`bill_note`
+        ) VALUES (
+                #{name},#{companyAddress},#{person},
+                #{phone},#{profession},#{province},
+                #{city},#{userId},#{customerState},
+                #{competitor},#{note},#{bankName},
+                #{bankNo},#{billAddress},#{billPerson},
+                #{billPhone},#{billNote}
+        )
+    </insert>
+
+
+    <select id="getFellowList" resultType="VoCustomerFollow">
+        SELECT  a.*,b.name as customerName  FROM  `customer_follow` a
+        LEFT JOIN `customer` b ON b.id = a.customer_id
+        WHERE  a.customer_id = #{customerId}
+        <if test="name != null">
+            and b.NAME LIKE #{name}
+        </if>
+        <if test="startTime != null">
+            AND a.create_time &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND a.create_time &lt; #{endTime}
+        </if>
+        <if test="subject != null">
+            AND a. SUBJECT = #{subject}
+        </if>
+        order by a.id desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+
+    <select id="getFellowListNum" resultType="int">
+        SELECT  count(1)  FROM  `customer_follow` a
+        <if test="name != null">
+            LEFT JOIN `customer` b ON b.id = a.customer_id
+        </if>
+        WHERE  a.customer_id = #{customerId}
+        <if test="name != null">
+            and b.NAME LIKE #{name}
+        </if>
+        <if test="startTime != null">
+            AND a.create_time &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND a.create_time &lt; #{endTime}
+        </if>
+        <if test="subject != null">
+            AND a. SUBJECT = #{subject}
+        </if>
+    </select>
+
+
+
+    <select id="queryCustomerList" resultType="VoCustomer">
+        SELECT  a.*,b.`name` as userName  FROM  `customer` a left join `user` b
+        on a.user_id=b.id   WHERE   1=1
+        <if test="name != null">
+            AND a.`name` LIKE #{name}
+        </if>
+        <if test="person != null">
+            AND a.`person` LIKE #{person}
+        </if>
+        <if test="profession != null">
+            AND a.`profession` LIKE #{profession}
+        </if>
+        <if test="province">
+            AND a.`province` = #{province}
+        </if>
+        <if test="city">
+            and a.`city` =#{city}
+        </if>
+        <if test="userId != null and userId != 0">
+            AND a.`userId` = #{userId}
+        </if>
+        <if test="customerState != null">
+            AND a.`customer_state`=#{customerState}
+        </if>
+        limit #{pageNum},#{pageSize}
+    </select>
+
+
+    <select id="queryCustomerListNum" resultType="int">
+        SELECT  count(1)  FROM  `customer`   WHERE  1=1
+        <if test="name != null">
+            AND `name` LIKE #{name}
+        </if>
+        <if test="person != null">
+            AND person LIKE #{person}
+        </if>
+        <if test="profession != null">
+            AND `profession` LIKE #{profession}
+        </if>
+        <if test="province">
+            AND `province` = #{province}
+        </if>
+        <if test="city">
+            and `city` =#{city}
+        </if>
+        <if test="userId != null and userId != 0">
+            AND `userId` = #{userId}
+        </if>
+        <if test="customerState != null">
+            AND `customer_state`=#{customerState}
+        </if>
+    </select>
+
+
+
+    <select id="getCustomerById" resultType="com.xisuo.sellmanager.entity.Customer">
+        select * from `customer`  where id=#{id}
+    </select>
+
+
+
+    <update id="modifyCustomer" parameterType="com.xisuo.sellmanager.entity.Customer">
+        UPDATE `customer`
+        SET
+         `name` = #{name},
+         `company_address` = #{companyAddress},
+         `person` = #{person},
+         `phone` = #{phone},
+         `profession` = #{profession},
+         `customer_state` = #{customerState},
+         `competitor` = #{competitor},
+         `note` = #{note},
+         `bank_name` = #{bankName},
+         `bank_no` = #{bankNo},
+         `bill_address` = #{billAddress},
+         `bill_person` = #{billPerson},
+         `bill_phone` = #{billPhone},
+         `bill_note` = #{billNote}
+        WHERE
+            `id` = #{id}
+    </update>
+
+
+
+    <select id="createFellow" parameterType="com.xisuo.sellmanager.entity.CustomerFollow">
+        INSERT INTO `customer_follow` (
+            `customer_id`,`user_id`,`create_time`,
+            `subject`,`content`,`next_time`,
+            `next_content`
+        )  VALUES 	(
+                #{customerId},#{userId},#{createTime},
+                #{subject},#{content},#{nextTime},
+                #{nextContent}
+        )
+    </select>
+
+
+    <select id="getAllFellow" resultType="CustomerFollow">
+        select * from customer_follow where customer_id = #{customerId}
+    </select>
+
+
+    <select id="queryCustomer" resultType="Customer">
+        SELECT  *  FROM  `customer`
+        <if test="name != null">
+            WHERE `name` LIKE #{name}
+            OR `person` LIKE #{name}
+        </if>
+    </select>
+
+
+    <update id="updateState">
+        UPDATE `customer`  set `customer_state` = #{toState} where `id` = #{customerId}
+    </update>
+
+
+    <select id="queryFellowDetail" resultType="CustomerFollow">
+        SELECT * from `customer_follow`  where `id` = #{id}
+    </select>
+
+
+    <select id="queryAllCustomer" resultType="hashmap">
+        SELECT `id`,`name` from `customer`
+    </select>
+
+
+    <delete id="deleteFellow">
+        DELETE from `customer_follow`  where `id` = #{id}
+    </delete>
+
+    <delete id="deleteCustomer">
+        delete from `customer`  where `id` = #{id}
+    </delete>
+
+
+    <delete id="deleteCustomerFellow">
+        DELETE from `customer_follow`  where `customer_id` = #{id}
+    </delete>
+
+
+    <select id="findName" resultType="int">
+        SELECT COUNT(1)  from `customer` where `name` = #{name}
+    </select>
+
+
+</mapper>

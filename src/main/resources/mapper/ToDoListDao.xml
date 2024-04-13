@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xisuo.sellmanager.dao.ToDoListDao">
+
+    <insert id="createWork" parameterType="ToDoList">
+        INSERT INTO `to_do_list` (
+            `user_id`, `content`,
+            `create_time`,`do_time`,`work_state`
+        )  VALUES   (
+            #{userId},#{content},
+            #{createTime},#{doTime},#{workState}
+        )
+    </insert>
+
+    <update id="modifyWork" parameterType="ToDoList">
+        UPDATE `to_do_list`
+        SET
+         `content` = #{content},
+         `do_time` = #{doTime}
+        WHERE
+            `id` =  #{id}  and  `user_id` = #{userId}
+    </update>
+
+    <select id="getAllWork" resultType="ToDoList">
+        SELECT * from `to_do_list` where `user_id`= #{userId}
+        <if test="keyword != null">
+            and `content` like #{keyword}
+        </if>
+        order by `id`  desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="getAllWorkNum" resultType="int">
+      SELECT count(1) from `to_do_list` where `user_id`= #{userId}
+        <if test="keyword != null">
+          and `content` like #{keyword}
+        </if>
+    </select>
+
+    <delete id="deleteWork">
+        delete from `to_do_list` where id = #{id} and `user_id`=#{userId}
+    </delete>
+
+    <update id="doneWord">
+        UPDATE `to_do_list`
+        SET
+         `work_state` = 1
+        WHERE
+            `id` = #{id}
+    </update>
+
+
+    <select id="queryUserTodos" resultType="ToDoList">
+        SELECT * from to_do_list where `user_id`= #{id}  and  `work_state`=0
+    </select>
+
+    <select id="queryOneToDo" resultType="ToDoList">
+      SELECT * from to_do_list where `id` = #{id}
+    </select>
+
+</mapper>

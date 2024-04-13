@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xisuo.sellmanager.dao.ProductDao">
+
+    <insert id="save" parameterType="com.xisuo.sellmanager.entity.Product">
+        INSERT INTO `product` (
+            `name`,`code`,
+            `create_time`,`supplier`,
+            `note`,`product_unit`
+        )  VALUES  (
+                #{name},#{code},
+                #{createTime},#{supplier},
+                #{note},#{productUnit}
+        )
+    </insert>
+
+    <select id="queryAllProduct" resultType="Product">
+        select  * from `product` where  1=1
+        <if test="keyword != null">
+            and `name` like #{keyword}
+        </if>
+        <if test="supplier != null">
+            and `supplier` like #{supplier}
+        </if>
+          limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="queryAllProductNum" resultType="int">
+        select count(1) from `product` where  1=1
+        <if test="keyword != null">
+            and `name` like #{keyword}
+        </if>
+        <if test="supplier != null">
+            and `supplier` like #{supplier}
+        </if>
+    </select>
+
+
+    <select id="queryProductById" resultType="Product">
+        select  * from `product` where id=#{id}
+    </select>
+
+
+    <update id="modifyProduct" parameterType="com.xisuo.sellmanager.entity.Product">
+        UPDATE `product`
+        SET
+         `name` = #{name},
+         `code` = #{code},
+         `supplier` = #{supplier},
+         `note` = #{note},
+         `product_unit` = #{productUnit}
+        WHERE
+            `id` = #{id};
+    </update>
+
+
+    <delete id="deleteProduct">
+        delete from `product` where `id`=#{id}
+    </delete>
+
+    <select id="queryProducts" resultType="hashmap">
+        SELECT `id`,`name` from `product`
+    </select>
+
+    <select id="queryProductIds" resultType="long">
+        SELECT `id` from `product` where `name` in
+        <foreach collection="productNames" item="item" open="(" close=")" separator=",">
+          #{item}
+        </foreach>
+    </select>
+
+    <select id="searchName" resultType="string">
+          SELECT `name`  FROM `product`  WHERE `name` LIKE #{name}
+    </select>
+
+    <select id="findName" resultType="int">
+          SELECT COUNT(1) from `product` where `name` = #{name}
+    </select>
+
+
+</mapper>

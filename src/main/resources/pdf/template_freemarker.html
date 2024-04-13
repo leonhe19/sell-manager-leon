@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+    <style>
+        body{
+            font-family:SimHei;
+        }
+        .blue{
+            color: red;
+        }
+        .pos{
+            position:absolute;
+            left:100px;
+            top:150px
+        }
+    </style>
+</head>
+<body>
+    <div><center>产品购销合同</center></div>
+    <span>供方:上海西索电力科技有限公司</span>   <span>${orderId}</span>
+    <span>需求方:${companyName}</span>   <span>orderId</span>
+
+
+     
+    <table style="border-collapse:collapse;margin:10px 0;borderColor:#000000;height:40;cellPadding:1;width:100%;"
+           align="center" border="1">
+        <tr>
+            <th>产品名</th>
+            <th>规格型号</th>
+            <th>单位</th>
+            <th>数量</th>
+            <th>单价（元）</th>
+            <th>总价（元）</th>
+            <th>备注</th>
+         </tr>
+        <#list PDFBeans.productList as product>
+            <tr>
+                <td>${product.name}</td>
+                <td>${product.version}</td>
+                <td>${product.unit}</td>
+                <td>${product.amount}</td>
+                <td>${product.price}</td>
+                <td>${product.allPrice}</td>
+                <td>${product.note}</td>
+            </tr>
+        </#list>
+    </table>
+
+</body>
+</html>
